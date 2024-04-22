@@ -6,7 +6,7 @@
 /*   By: myeow <myeow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/21 02:43:41 by myeow             #+#    #+#             */
-/*   Updated: 2024/04/21 23:04:25 by myeow            ###   ########.fr       */
+/*   Updated: 2024/04/22 19:41:12 by myeow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,10 +16,10 @@
 static void	pipex_free(t_pipex *vars)
 {
 	ft_free_ft_split(vars->path_dirs);
-	if (vars->p_array)
+	if (vars->fd_array)
 	{
-		free(vars->p_array);
-		vars->p_array = 0;
+		free(vars->fd_array);
+		vars->fd_array = 0;
 	}
 }
 

@@ -6,7 +6,7 @@
 /*   By: myeow <myeow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/18 16:46:23 by myeow             #+#    #+#             */
-/*   Updated: 2024/04/22 01:07:36 by myeow            ###   ########.fr       */
+/*   Updated: 2024/04/22 19:41:39 by myeow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,9 +17,9 @@ static void	pipex_pipe_create(t_pipex *vars)
 	int	i;
 
 	i = -1;
-	while (++i < vars->cmd_count - 1)
+	while (++i < vars->pipe_count)
 	{
-		if (pipe(vars->p_array + (i * 2)) == -1)
+		if (pipe(vars->fd_array + (i * 2)) == -1)
 			pipex_error("Pipe Creation Failed.", 0, vars, 1);
 	}
 }
@@ -29,14 +29,14 @@ static void	pipex_dup_fd(int i, t_pipex *vars)
 	if (!i)
 	{
 		dup2(vars->in_fd, STDIN_FILENO);
-		dup2(vars->p_array[1], STDOUT_FILENO);
+		dup2(vars->fd_array[1], STDOUT_FILENO);
 		return ;
 	}
-	dup2(vars->p_array[(i - 1) * 2], STDIN_FILENO);
-	if (i == vars->cmd_count - 1)
+	dup2(vars->fd_array[(i - 1) * 2], STDIN_FILENO);
+	if (i == vars->pipe_count)
 		dup2(vars->out_fd, STDOUT_FILENO);
 	else
-		dup2(vars->p_array[i * 2 + 1], STDOUT_FILENO);
+		dup2(vars->fd_array[i * 2 + 1], STDOUT_FILENO);
 	return ;
 }
 
@@ -90,10 +90,9 @@ static void	pipex_execute(char *cmd_str, char **envp, int i, t_pipex *vars)
 	if (!pid)
 	{
 		pipex_dup_fd(i, vars);
-		pipex_close_pipes(vars->p_count, vars->p_array);
+		pipex_close_pipes(vars->fd_count, vars->fd_array);
 		prog_args = ft_split(cmd_str, ' ');
 		prog_path = pipex_get_prog(vars->path_dirs, prog_args[0], &flag);
-		pipex_close_pipes(vars->p_count, vars->p_array);
 		if (execve(prog_path, prog_args, envp) == -1)
 		{
 			if (flag)
@@ -109,17 +108,19 @@ static void	pipex_execute(char *cmd_str, char **envp, int i, t_pipex *vars)
 void	pipex_pipe(t_pipex *vars, int argc, char **argv, char **envp)
 {
 	int	i;
+	int	cmd_count;
 
-	vars->cmd_count = argc - (3 + vars->heredoc_flag);
-	vars->p_count = (vars->cmd_count - 1) * 2;
-	vars->p_array = (int *) ft_calloc(vars->p_count, sizeof(int));
-	if (!vars->p_array)
+	cmd_count = argc - (3 + vars->heredoc_flag);
+	vars->pipe_count = cmd_count - 1;
+	vars->fd_count = (vars->pipe_count) * 2;
+	vars->fd_array = (int *) ft_calloc(vars->fd_count, sizeof(int));
+	if (!vars->fd_array)
 		return (pipex_error("Malloc Pipe Array Failed.", 0, vars, 1));
 	pipex_pipe_create(vars);
 	i = -1;
 	if (vars->in_fd == -1 && vars->heredoc_flag == 0)
 		++i;
-	while (++i < vars->cmd_count)
+	while (++i < cmd_count)
 		pipex_execute(argv[i + 2 + vars->heredoc_flag], envp, i, vars);
-	pipex_close_pipes(vars->p_count, vars->p_array);
+	pipex_close_pipes(vars->fd_count, vars->fd_array);
 }

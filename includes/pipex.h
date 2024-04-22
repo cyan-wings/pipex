@@ -6,7 +6,7 @@
 /*   By: myeow <myeow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/10 17:34:24 by myeow             #+#    #+#             */
-/*   Updated: 2024/04/22 00:33:18 by myeow            ###   ########.fr       */
+/*   Updated: 2024/04/22 19:39:40 by myeow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,9 +23,9 @@ typedef struct s_pipex
 	int		out_fd;
 	int		heredoc_flag;
 	char	**path_dirs;
-	int		cmd_count;
-	int		p_count;
-	int		*p_array;
+	int		pipe_count;
+	int		fd_count;
+	int		*fd_array;
 }	t_pipex;
 
 void	pipex_clean(t_pipex *vars);
